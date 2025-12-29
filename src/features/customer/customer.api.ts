@@ -23,7 +23,7 @@ export async function listCustomersView(params: { searchTerm?: string; limit?: n
   // Keep your existing OR-per-token behavior:
   for (const token of tokens) {
     query = query.or(
-      `name.ilike.%${token}%,user_pppoe.ilike.%${token}%,alamat.ilike.%${token}%,onu_sn.ilike.%${token}%`
+      `nama.ilike.%${token}%,user_pppoe.ilike.%${token}%,alamat.ilike.%${token}%,onu_sn.ilike.%${token}%`
     );
   }
 

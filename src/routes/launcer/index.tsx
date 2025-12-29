@@ -2,13 +2,13 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { cn } from '~/lib/utils'
-import { TicketModal } from '@/components/modal/openTicketModal'
+import { TicketModal } from '~/components/modal/ticketModal'
 import { useAppStore } from '~/hooks/store'
 import { APPS_CONFIG } from './components/apps'
 import { AddItemMenu } from './components/addMenutItem'
-import { ConfigModalTest } from '@/components/modal/configModalTest'
+import { ConfigModal } from '~/components/modal/configModal'
 
-export const Route = createFileRoute('/launcher/')({
+export const Route = createFileRoute('/launcer/')({
     component: Launcher,
 })
 
@@ -40,21 +40,21 @@ export function Launcher() {
             {/* --- MODALS SECTION --- */}
             
             {/* 1. Manual Config */}
-            <ConfigModalTest
+            <ConfigModal
                 isOpen={modalType === 'config'}
                 onClose={() => setModalType('none')}
                 type="manual"
             />
 
             {/* 2. Bridge Config */}
-            <ConfigModalTest
+            <ConfigModal
                 isOpen={modalType === 'config_bridge'}
                 onClose={() => setModalType('none')}
                 type="bridge"
             />
 
             {/* 3. Batch Config */}
-            <ConfigModalTest
+            <ConfigModal
                 isOpen={modalType === 'config_batch'}
                 onClose={() => setModalType('none')}
                 type="batch"
@@ -86,7 +86,7 @@ export function Launcher() {
                         )}>
                             <div className={cn(
                                 "mb-6 transition-transform duration-300 group-hover:scale-110",
-                                app.id === 'new' ? "mb-4" : ""
+                                app.id === 'new' ? 'mb-4' : ''
                             )}>
                                 <app.icon strokeWidth={1.5} className={cn("w-10 h-10", app.iconColor)} />
                             </div>

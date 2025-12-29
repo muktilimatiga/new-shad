@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LauncerIndexRouteImport } from './routes/launcer/index'
 import { Route as EponIndexRouteImport } from './routes/epon/index'
 import { Route as BroadbandIndexRouteImport } from './routes/broadband/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LauncerIndexRoute = LauncerIndexRouteImport.update({
+  id: '/launcer/',
+  path: '/launcer/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EponIndexRoute = EponIndexRouteImport.update({
@@ -33,30 +39,34 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/broadband': typeof BroadbandIndexRoute
   '/epon': typeof EponIndexRoute
+  '/launcer': typeof LauncerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/broadband': typeof BroadbandIndexRoute
   '/epon': typeof EponIndexRoute
+  '/launcer': typeof LauncerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/broadband/': typeof BroadbandIndexRoute
   '/epon/': typeof EponIndexRoute
+  '/launcer/': typeof LauncerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/broadband' | '/epon'
+  fullPaths: '/' | '/broadband' | '/epon' | '/launcer'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/broadband' | '/epon'
-  id: '__root__' | '/' | '/broadband/' | '/epon/'
+  to: '/' | '/broadband' | '/epon' | '/launcer'
+  id: '__root__' | '/' | '/broadband/' | '/epon/' | '/launcer/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BroadbandIndexRoute: typeof BroadbandIndexRoute
   EponIndexRoute: typeof EponIndexRoute
+  LauncerIndexRoute: typeof LauncerIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/launcer/': {
+      id: '/launcer/'
+      path: '/launcer'
+      fullPath: '/launcer'
+      preLoaderRoute: typeof LauncerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/epon/': {
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BroadbandIndexRoute: BroadbandIndexRoute,
   EponIndexRoute: EponIndexRoute,
+  LauncerIndexRoute: LauncerIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

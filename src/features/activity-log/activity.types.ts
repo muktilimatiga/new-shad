@@ -1,9 +1,9 @@
 // src/features/customers/customers.types.ts
 import type { Tables } from "~/database.types";
 
-export type LogKomplainRow = Tables<"log_komplain">;
+export type LogActivityRow = Tables<"log_activity">;
 
 // If you want a UI type with computed fields:
-export type LogKomplain = LogKomplainRow & {
+export type LogActivity = LogActivityRow & {
   createdAt: string;
 };
