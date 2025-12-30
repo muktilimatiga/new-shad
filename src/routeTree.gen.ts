@@ -10,13 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OcrIndexRouteImport } from './routes/ocr/index'
+import { Route as LogKomplainIndexRouteImport } from './routes/log-komplain/index'
 import { Route as LauncerIndexRouteImport } from './routes/launcer/index'
 import { Route as EponIndexRouteImport } from './routes/epon/index'
 import { Route as BroadbandIndexRouteImport } from './routes/broadband/index'
+import { Route as OcrComponentsResultDisplayRouteImport } from './routes/ocr/components/resultDisplay'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OcrIndexRoute = OcrIndexRouteImport.update({
+  id: '/ocr/',
+  path: '/ocr/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogKomplainIndexRoute = LogKomplainIndexRouteImport.update({
+  id: '/log-komplain/',
+  path: '/log-komplain/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LauncerIndexRoute = LauncerIndexRouteImport.update({
@@ -34,18 +47,30 @@ const BroadbandIndexRoute = BroadbandIndexRouteImport.update({
   path: '/broadband/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OcrComponentsResultDisplayRoute =
+  OcrComponentsResultDisplayRouteImport.update({
+    id: '/ocr/components/resultDisplay',
+    path: '/ocr/components/resultDisplay',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/broadband': typeof BroadbandIndexRoute
   '/epon': typeof EponIndexRoute
   '/launcer': typeof LauncerIndexRoute
+  '/log-komplain': typeof LogKomplainIndexRoute
+  '/ocr': typeof OcrIndexRoute
+  '/ocr/components/resultDisplay': typeof OcrComponentsResultDisplayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/broadband': typeof BroadbandIndexRoute
   '/epon': typeof EponIndexRoute
   '/launcer': typeof LauncerIndexRoute
+  '/log-komplain': typeof LogKomplainIndexRoute
+  '/ocr': typeof OcrIndexRoute
+  '/ocr/components/resultDisplay': typeof OcrComponentsResultDisplayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +78,38 @@ export interface FileRoutesById {
   '/broadband/': typeof BroadbandIndexRoute
   '/epon/': typeof EponIndexRoute
   '/launcer/': typeof LauncerIndexRoute
+  '/log-komplain/': typeof LogKomplainIndexRoute
+  '/ocr/': typeof OcrIndexRoute
+  '/ocr/components/resultDisplay': typeof OcrComponentsResultDisplayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/broadband' | '/epon' | '/launcer'
+  fullPaths:
+    | '/'
+    | '/broadband'
+    | '/epon'
+    | '/launcer'
+    | '/log-komplain'
+    | '/ocr'
+    | '/ocr/components/resultDisplay'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/broadband' | '/epon' | '/launcer'
-  id: '__root__' | '/' | '/broadband/' | '/epon/' | '/launcer/'
+  to:
+    | '/'
+    | '/broadband'
+    | '/epon'
+    | '/launcer'
+    | '/log-komplain'
+    | '/ocr'
+    | '/ocr/components/resultDisplay'
+  id:
+    | '__root__'
+    | '/'
+    | '/broadband/'
+    | '/epon/'
+    | '/launcer/'
+    | '/log-komplain/'
+    | '/ocr/'
+    | '/ocr/components/resultDisplay'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +117,9 @@ export interface RootRouteChildren {
   BroadbandIndexRoute: typeof BroadbandIndexRoute
   EponIndexRoute: typeof EponIndexRoute
   LauncerIndexRoute: typeof LauncerIndexRoute
+  LogKomplainIndexRoute: typeof LogKomplainIndexRoute
+  OcrIndexRoute: typeof OcrIndexRoute
+  OcrComponentsResultDisplayRoute: typeof OcrComponentsResultDisplayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -76,6 +129,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ocr/': {
+      id: '/ocr/'
+      path: '/ocr'
+      fullPath: '/ocr'
+      preLoaderRoute: typeof OcrIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/log-komplain/': {
+      id: '/log-komplain/'
+      path: '/log-komplain'
+      fullPath: '/log-komplain'
+      preLoaderRoute: typeof LogKomplainIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/launcer/': {
@@ -99,6 +166,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BroadbandIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ocr/components/resultDisplay': {
+      id: '/ocr/components/resultDisplay'
+      path: '/ocr/components/resultDisplay'
+      fullPath: '/ocr/components/resultDisplay'
+      preLoaderRoute: typeof OcrComponentsResultDisplayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +181,9 @@ const rootRouteChildren: RootRouteChildren = {
   BroadbandIndexRoute: BroadbandIndexRoute,
   EponIndexRoute: EponIndexRoute,
   LauncerIndexRoute: LauncerIndexRoute,
+  LogKomplainIndexRoute: LogKomplainIndexRoute,
+  OcrIndexRoute: OcrIndexRoute,
+  OcrComponentsResultDisplayRoute: OcrComponentsResultDisplayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

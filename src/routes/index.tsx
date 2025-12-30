@@ -1,15 +1,16 @@
-import { Outlet, createFileRoute } from '@tanstack/react-router'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { queryClient } from '~/lib/queryClient'
+import { createFileRoute } from '@tanstack/react-router'
+import { Launcher } from './launcer'
+import { Toaster } from 'sonner'
 
 export const Route = createFileRoute('/')({
-  component: RootComponent,
+  component: App,
 })
 
-function RootComponent() {
+function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Outlet />
-    </QueryClientProvider>
+    <>
+      <Toaster richColors />
+      <Launcher />
+    </>
   )
 }

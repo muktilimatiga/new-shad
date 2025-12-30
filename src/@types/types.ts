@@ -139,7 +139,7 @@ export const UserSchema = z.object({
   username: z.string(),
   role: z.string(),
   password: z.string(),
-  avatar_Url: z.unknown().optional,
+  avatar_Url: z.string().optional(),
 })
 export const CustomerSchema = z.object({
   id: z.string(),

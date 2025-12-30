@@ -1,15 +1,13 @@
-import {
-  HeadContent,
-  Scripts,
-  Outlet,
-  createRootRoute,
-} from '@tanstack/react-router'
+import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-
-import { queryClient } from '@/lib/queryClient'
+import { QueryClient } from '@tanstack/react-query'
 import appCss from '../styles.css?url'
+import { AppLayout } from '~/components/Layout'
+import { ErrorPage } from './errors'
+
+const queryClient = new QueryClient()
 
 export const Route = createRootRoute({
   head: () => ({
@@ -21,17 +19,17 @@ export const Route = createRootRoute({
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
 
-  // ✅ This wraps all routes with React Query
+  notFoundComponent: ErrorPage,
+
   component: RootApp,
 
-  // ✅ Keep this as your HTML shell
   shellComponent: RootDocument,
 })
 
 function RootApp() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AppLayout />
     </QueryClientProvider>
   )
 }
