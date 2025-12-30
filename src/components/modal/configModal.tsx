@@ -49,7 +49,6 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
 
-    // ✅ 3. THE NEW DATA SOURCE
     // This handles loading, error, and caching automatically using React Query
     const { 
         data: searchResults = [], 
@@ -117,10 +116,9 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
         }
 
         if (selected) {
-            form.setFieldValue('name', selected.name || '');
+            form.setFieldValue('name', selected.nama || '');
             form.setFieldValue('address', selected.alamat || '');
             form.setFieldValue('user_pppoe', selected.user_pppoe || '');
-            // Note: Check if 'pppoe_password' exists in your view, otherwise map correctly
             form.setFieldValue('pass_pppoe', selected.pppoe_password || selected.pass_pppoe || '');
             
             // Optional: Reset search after selection
@@ -208,7 +206,7 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
                             isFetchingPSB={isRefetchingPsb}
                             selectPSBList={handleSelectPsb}
                             
-                            // ✅ Manual Mode Props (Now using React Query)
+                            // Manual Mode Props (Now using React Query)
                             selectUser={handleSelectUser}
                             fiberList={searchResults}         // Data from useCustomersView
                             fiberSearchTerm={searchTerm}      // Local state

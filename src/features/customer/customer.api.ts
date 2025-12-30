@@ -9,7 +9,7 @@ export async function listCustomersView(params: { searchTerm?: string; limit?: n
   let query = supabase
     .from("customers_view")
     .select("*")
-    .order("id", { ascending: false });
+    .order("nama", { ascending: false });
 
   if (!searchTerm) {
     const res = await query.limit(limit).returns<CustomerViewRow[]>();
