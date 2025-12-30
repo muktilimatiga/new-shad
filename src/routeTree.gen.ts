@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OcrIndexRouteImport } from './routes/ocr/index'
+import { Route as LogsIndexRouteImport } from './routes/logs/index'
 import { Route as LogKomplainIndexRouteImport } from './routes/log-komplain/index'
 import { Route as LauncerIndexRouteImport } from './routes/launcer/index'
 import { Route as EponIndexRouteImport } from './routes/epon/index'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const OcrIndexRoute = OcrIndexRouteImport.update({
   id: '/ocr/',
   path: '/ocr/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogsIndexRoute = LogsIndexRouteImport.update({
+  id: '/logs/',
+  path: '/logs/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LogKomplainIndexRoute = LogKomplainIndexRouteImport.update({
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/epon': typeof EponIndexRoute
   '/launcer': typeof LauncerIndexRoute
   '/log-komplain': typeof LogKomplainIndexRoute
+  '/logs': typeof LogsIndexRoute
   '/ocr': typeof OcrIndexRoute
   '/ocr/components/resultDisplay': typeof OcrComponentsResultDisplayRoute
 }
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/epon': typeof EponIndexRoute
   '/launcer': typeof LauncerIndexRoute
   '/log-komplain': typeof LogKomplainIndexRoute
+  '/logs': typeof LogsIndexRoute
   '/ocr': typeof OcrIndexRoute
   '/ocr/components/resultDisplay': typeof OcrComponentsResultDisplayRoute
 }
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/epon/': typeof EponIndexRoute
   '/launcer/': typeof LauncerIndexRoute
   '/log-komplain/': typeof LogKomplainIndexRoute
+  '/logs/': typeof LogsIndexRoute
   '/ocr/': typeof OcrIndexRoute
   '/ocr/components/resultDisplay': typeof OcrComponentsResultDisplayRoute
 }
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/epon'
     | '/launcer'
     | '/log-komplain'
+    | '/logs'
     | '/ocr'
     | '/ocr/components/resultDisplay'
   fileRoutesByTo: FileRoutesByTo
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/epon'
     | '/launcer'
     | '/log-komplain'
+    | '/logs'
     | '/ocr'
     | '/ocr/components/resultDisplay'
   id:
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/epon/'
     | '/launcer/'
     | '/log-komplain/'
+    | '/logs/'
     | '/ocr/'
     | '/ocr/components/resultDisplay'
   fileRoutesById: FileRoutesById
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   EponIndexRoute: typeof EponIndexRoute
   LauncerIndexRoute: typeof LauncerIndexRoute
   LogKomplainIndexRoute: typeof LogKomplainIndexRoute
+  LogsIndexRoute: typeof LogsIndexRoute
   OcrIndexRoute: typeof OcrIndexRoute
   OcrComponentsResultDisplayRoute: typeof OcrComponentsResultDisplayRoute
 }
@@ -136,6 +149,13 @@ declare module '@tanstack/react-router' {
       path: '/ocr'
       fullPath: '/ocr'
       preLoaderRoute: typeof OcrIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logs/': {
+      id: '/logs/'
+      path: '/logs'
+      fullPath: '/logs'
+      preLoaderRoute: typeof LogsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/log-komplain/': {
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   EponIndexRoute: EponIndexRoute,
   LauncerIndexRoute: LauncerIndexRoute,
   LogKomplainIndexRoute: LogKomplainIndexRoute,
+  LogsIndexRoute: LogsIndexRoute,
   OcrIndexRoute: OcrIndexRoute,
   OcrComponentsResultDisplayRoute: OcrComponentsResultDisplayRoute,
 }

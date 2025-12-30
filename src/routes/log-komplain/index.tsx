@@ -15,12 +15,8 @@ import {
   Filter,
 } from 'lucide-react'
 import { useTicketStore, type TicketMode } from '~/store/ticketStore'
-
-// Custom Hooks
 import { useKomplainView } from '~/features/ticket/ticket.hooks'
 import { ColumnFilter } from '~/components/columnFilter'
-
-// Unified Modal
 import { TicketModal } from '~/components/modal/ticketModal'
 
 // --- Helper Components ---
@@ -29,7 +25,7 @@ const StatusBadge = ({ status }: { status: string }) => {
     open: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-900/50',
     proses:
       'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-900/50',
-    'fwd teknis':
+    'done / fwd teknis':
       'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-900/50',
     done: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-900/50',
   }
@@ -108,7 +104,7 @@ const LogTicketPage = () => {
         filterFn: 'equalsString',
         meta: {
           filterType: 'select',
-          filterOptions: ['open', 'proses', 'fwd teknis', 'done'],
+          filterOptions: ['open', 'proses', 'fwd teknis', 'done', 'done / fwd teknis'],
         },
         header: ({ column }) => (
           <div className="flex items-center gap-1">
@@ -190,10 +186,10 @@ const LogTicketPage = () => {
               {(t.status === 'fwd teknis' ||
                 t.status === 'done' ||
                 t.status === 'closed') && (
-                <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" /> Done
-                </span>
-              )}
+                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                    <CheckCircle2 className="h-3 w-3" /> Done
+                  </span>
+                )}
             </div>
           )
         },
@@ -244,6 +240,8 @@ const LogTicketPage = () => {
         data={tickets}
         columnOverrides={columnOverrides}
         pageSize={15}
+        visibleColumns={['ticketId', 'nama', 'kendala', 'status', 'waktu', 'tanggal']}
+        mobileColumns={['ticketId', 'nama', 'status', 'actions']}
       />
     </div>
   )

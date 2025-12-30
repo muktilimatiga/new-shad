@@ -25,7 +25,7 @@ export async function listKomplain(
   // Keep your existing OR-per-token behavior:
   for (const token of tokens) {
     query = query.or(
-      `name.ilike.%${token}%,user_pppoe.ilike.%${token}%,alamat.ilike.%${token}%,onu_sn.ilike.%${token}%`,
+      `nama.ilike.%${token}%,user_pppoe.ilike.%${token}%,alamat.ilike.%${token}%,kendala.ilike.%${token}%`,
     )
   }
 
@@ -36,27 +36,28 @@ export async function listKomplain(
 }
 
 function mapRow(row: LogKomplainRow): LogKomplain {
-  // Pick what you want as "createdAt"
-  const createdAt = row.last_updated
-    ? new Date(row.last_updated).toISOString()
-    : new Date().toISOString()
 
-  // Mapping & type casting
   const status = (
-    ['open', 'proses', 'fwd teknis', 'closed', 'done'].includes(
+    ['open', 'proses', 'fwd teknis', 'closed', 'done', 'done / fwd teknis'].includes(
       row.status ?? '',
     )
       ? row.status
       : 'open'
   ) as LogKomplain['status']
 
+  const tanggal = row.tanggal ?? ''
+  const waktu = row.waktu ?? ''
+  const createdAt = tanggal && waktu ? `${tanggal} ${waktu}` : tanggal
+
   return {
     ...row,
-    createdAt,
-    ticketId: row.tiket ?? '', // Map 'tiket' -> 'ticketId'
-    PIC: row.pic ?? '', // Map 'pic' -> 'PIC'
+    ticketId: row.tiket ?? '',
+    PIC: row.pic ?? '',
     nama: row.nama ?? '',
     kendala: row.kendala ?? '',
     status,
+    tanggal,
+    waktu,
+    createdAt,
   }
 }

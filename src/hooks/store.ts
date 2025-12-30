@@ -1,7 +1,8 @@
-
 import { create } from 'zustand';
 import type { User, Notification } from '~/@types/types'
 import { supabase } from '~/lib/supabase'
+
+const USER_STORAGE_KEY = 'selected_user_id';
 
 interface UserSettings {
   reducedMotion: boolean;
@@ -85,19 +86,28 @@ export const useAppStore = create<AppState>((set) => ({
 
   user: null, // Start with null to allow fetching
 
-  login: (user) => set({ user }),
+  login: (user) => {
+    // Save user ID to localStorage for persistence
+    localStorage.setItem(USER_STORAGE_KEY, user.id);
+    set({ user });
+  },
   logout: () => set({ user: null }),
   updateUser: (updates) => set((state) => ({
     user: state.user ? { ...state.user, ...updates } : null
   })),
   fetchUser: async () => {
     try {
-      // Fetch the first user from the 'users' table to simulate the current session
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .limit(1)
-        .maybeSingle();
+      // Check localStorage for a saved user ID
+      const savedUserId = localStorage.getItem(USER_STORAGE_KEY);
+
+      let query = supabase.from('users').select('*');
+
+      if (savedUserId) {
+        // Fetch the saved user by ID (convert to number since DB id is numeric)
+        query = query.eq('id', Number(savedUserId));
+      }
+
+      const { data, error } = await query.limit(1).maybeSingle();
 
       if (error) throw error;
 
@@ -109,9 +119,30 @@ export const useAppStore = create<AppState>((set) => ({
             username: data.username || 'system',
             password: data.password || 'password',
             role: data.role || 'noc',
-            avatar_Url:  `https://ui-avatars.com/api/?name=${encodeURIComponent(data.full_name || data.username)}&background=random`,
+            avatar_Url: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.full_name || data.username)}&background=random`,
           }
         });
+      } else if (savedUserId) {
+        // Saved user not found, clear localStorage and fetch default
+        localStorage.removeItem(USER_STORAGE_KEY);
+        const { data: defaultUser } = await supabase
+          .from('users')
+          .select('*')
+          .limit(1)
+          .maybeSingle();
+
+        if (defaultUser) {
+          set({
+            user: {
+              id: String(defaultUser.id),
+              name: defaultUser.full_name || defaultUser.username || 'System User',
+              username: defaultUser.username || 'system',
+              password: defaultUser.password || 'password',
+              role: defaultUser.role || 'noc',
+              avatar_Url: `https://ui-avatars.com/api/?name=${encodeURIComponent(defaultUser.full_name || defaultUser.username)}&background=random`,
+            }
+          });
+        }
       }
     } catch (err) {
       console.error("Failed to fetch user from Supabase:", err);

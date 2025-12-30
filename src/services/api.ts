@@ -1,23 +1,32 @@
-// src/services/api.ts
-import Axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios'
+import type { AxiosRequestConfig, AxiosError } from 'axios'
 
-export const AXIOS_INSTANCE = Axios.create({ baseURL: process.env.NEXT_PUBLIC_API_URL || '' }); // or your specific URL
+// Base API configuration
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+
+export const AXIOS_INSTANCE = axios.create({
+    baseURL: API_BASE_URL,
+})
+console.log(API_BASE_URL)
 
 export const customInstance = <T>(
     config: AxiosRequestConfig,
     options?: AxiosRequestConfig,
 ): Promise<T> => {
-    const source = Axios.CancelToken.source();
+    const source = axios.CancelToken.source()
     const promise = AXIOS_INSTANCE({
         ...config,
         ...options,
         cancelToken: source.token,
-    }).then(({ data }) => data);
+    }).then(({ data }) => data)
 
     // @ts-ignore
     promise.cancel = () => {
-        source.cancel('Query was cancelled');
-    };
+        source.cancel('Query was cancelled')
+    }
 
-    return promise;
-};
+    return promise
+}
+
+// Generic type error wrapper for use by Orval if needed
+export type ErrorType<Error> = AxiosError<Error>

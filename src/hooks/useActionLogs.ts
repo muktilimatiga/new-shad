@@ -1,6 +1,7 @@
 // src/hooks/useActionLog.ts
 import { toast } from "sonner";
 import { useLogActivity } from '~/features/activity-log/activity.hooks';
+import { useAppStore } from '~/hooks/store';
 
 type ActionSuccessOptions<T> = {
     title: string;
@@ -12,7 +13,8 @@ type ActionSuccessOptions<T> = {
 
 export function useActionSuccess<T>() {
     // 1. Use the new Mutation Hook
-    const { mutate: logActivity } = useLogActivity(); 
+    const { mutate: logActivity } = useLogActivity();
+    const addNotification = useAppStore((s) => s.addNotification);
 
     return (value: T, options: ActionSuccessOptions<T>) => {
         const {
@@ -24,6 +26,13 @@ export function useActionSuccess<T>() {
         } = options;
 
         toast.success(`${title} Successful`);
+
+        // Push to notification dropdown
+        addNotification({
+            title: `${title} Successful`,
+            message: `${action} on ${target} completed successfully.`,
+            type: 'success',
+        });
 
         // 2. Call the mutation
         logActivity({
@@ -40,11 +49,19 @@ export function useActionSuccess<T>() {
 export function useActionError() {
     // 1. Use the new Mutation Hook
     const { mutate: logActivity } = useLogActivity();
+    const addNotification = useAppStore((s) => s.addNotification);
 
     return (err: any, action: string, target: string) => { // Changed err to any/Error
         const errorMessage = err?.message || "Unknown error";
-        
+
         toast.error(errorMessage || "Action Failed");
+
+        // Push to notification dropdown
+        addNotification({
+            title: `${action} on ${target} Failed`,
+            message: errorMessage,
+            type: 'error',
+        });
 
         // 2. Call the mutation
         logActivity({

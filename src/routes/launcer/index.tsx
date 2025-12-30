@@ -14,10 +14,10 @@ export const Route = createFileRoute('/launcer/')({
 
 export function Launcher() {
     const { setCreateTicketModalOpen, isCreateTicketModalOpen } = useAppStore();
-    
+
     // State for the configuration modals
     const [modalType, setModalType] = useState<'none' | 'config' | 'config_bridge' | 'config_batch'>('none');
-    
+
     // State for the "Add New Item" menu
     const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
 
@@ -36,9 +36,9 @@ export function Launcher() {
 
     return (
         <div className="p-8 md:p-12 max-w-[1600px] mx-auto animate-in fade-in duration-500 py-8">
-            
+
             {/* --- MODALS SECTION --- */}
-            
+
             {/* 1. Manual Config */}
             <ConfigModal
                 isOpen={modalType === 'config'}
@@ -68,14 +68,14 @@ export function Launcher() {
             />
 
             {/* 5. The Add Menu (Hidden by default, controlled by isAddMenuOpen) */}
-            <AddItemMenu 
-                isOpen={isAddMenuOpen} 
-                onOpenChange={setIsAddMenuOpen} 
-                onSelect={openModal} 
+            <AddItemMenu
+                isOpen={isAddMenuOpen}
+                onOpenChange={setIsAddMenuOpen}
+                onSelect={openModal}
             />
 
             {/* --- GRID LAYOUT SECTION --- */}
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-6">
                 {APPS_CONFIG.map((app) => {
                     const CardContent = (
@@ -110,9 +110,9 @@ export function Launcher() {
                     // LOGIC: If the card ID is 'new', clicking it opens the Menu
                     if (app.id === 'new') {
                         return (
-                            <div 
-                                key={app.id} 
-                                className="block outline-none cursor-pointer group select-none" 
+                            <div
+                                key={app.id}
+                                className="w-full outline-none cursor-pointer group select-none"
                                 onClick={() => setIsAddMenuOpen(true)}
                             >
                                 {CardContent}
@@ -122,14 +122,14 @@ export function Launcher() {
 
                     if (app.to) {
                         return (
-                            <Link key={app.id} to={app.to} className="block group outline-none select-none">
+                            <Link key={app.id} to={app.to} className="group outline-none select-none">
                                 {CardContent}
                             </Link>
                         );
                     }
 
                     return (
-                        <div key={app.id} className="block outline-none group select-none">
+                        <div key={app.id} className=" outline-none group select-none">
                             {CardContent}
                         </div>
                     );

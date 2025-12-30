@@ -53,7 +53,7 @@ interface TicketStore {
     reset: () => void;
 }
 
-export const useTicketStore = create<TicketStore>((set) => ({ 
+export const useTicketStore = create<TicketStore>((set) => ({
     // Initial State
     step: 1,
     selectedUser: null,
@@ -62,53 +62,52 @@ export const useTicketStore = create<TicketStore>((set) => ({
 
     // Select Customer Actions
     selectUser: (customer) => {
-            const randomRef = `TN${Math.floor(Math.random() * 100000).toString().padStart(6, '0')}`;
-            set({
-                selectedUser: customer,
-                step: 2,
-                formData: {
-                    ...INITIAL_FORM_DATA,
-                    name: customer.name?.toUpperCase() || '',
-                    address: customer.alamat || '',
-                    user_pppoe: customer.user_pppoe || '',
-                    onu_sn: customer.onu_sn || '',
-                    olt_name: customer.olt_name || '',
-                    // If interface isn't on CustomerView, handle strictly or add to View
-                    interface: (customer as any).interface || '', 
-                    ticketRef: randomRef,
-                    priority: 'Low',
-                    type: 'FREE',
-                    PIC: useAppStore.getState().user?.name || ''
-                }
-            });
-        },
+        const randomRef = `TN${Math.floor(Math.random() * 100000).toString().padStart(6, '0')}`;
+        set({
+            selectedUser: customer,
+            step: 2,
+            formData: {
+                ...INITIAL_FORM_DATA,
+                name: (customer.nama || customer.name)?.toUpperCase() || '',
+                address: customer.alamat || '',
+                user_pppoe: customer.user_pppoe || '',
+                onu_sn: customer.onu_sn || '',
+                olt_name: customer.olt_name || '',
+                interface: customer.interface || '',
+                ticketRef: randomRef,
+                priority: 'Low',
+                type: 'FREE',
+                PIC: useAppStore.getState().user?.name || ''
+            }
+        });
+    },
 
 
     // --- 1.5 Fetch Customer By Name (For initializing existing tickets) ---
-    fetchCustomerByName: async (name: string) => {
-            if (!name) return;
-            try {
-                // Reusing your listCustomersView API
-                const results = await listCustomersView({ searchTerm: name, limit: 1 }); //
-                const data = results[0];
+    fetchCustomerByName: async (nama: string) => {
+        if (!nama) return;
+        try {
+            // Reusing your listCustomersView API
+            const results = await listCustomersView({ searchTerm: nama, limit: 1 }); //
+            const data = results[0];
 
-                if (data) {
-                    set((state) => ({
-                        selectedUser: data,
-                        formData: {
-                            ...state.formData,
-                            name: data.name || state.formData.name,
-                            address: data.alamat || state.formData.address,
-                            user_pppoe: data.user_pppoe || state.formData.user_pppoe,
-                            onu_sn: data.onu_sn || state.formData.onu_sn,
-                            olt_name: data.olt_name || state.formData.olt_name,
-                        }
-                    }));
-                }
-            } catch (err) {
-                console.error("Failed to hydrate customer:", err);
+            if (data) {
+                set((state) => ({
+                    selectedUser: data,
+                    formData: {
+                        ...state.formData,
+                        name: data.nama || data.name || state.formData.name,
+                        address: data.alamat || state.formData.address,
+                        user_pppoe: data.user_pppoe || state.formData.user_pppoe,
+                        onu_sn: data.onu_sn || state.formData.onu_sn,
+                        olt_name: data.olt_name || state.formData.olt_name,
+                    }
+                }));
             }
-        },
+        } catch (err) {
+            console.error("Failed to hydrate customer:", err);
+        }
+    },
 
 
     // --- 3. Initialize Logic (For Edit / Forward / Close Modes) ---
@@ -145,12 +144,12 @@ export const useTicketStore = create<TicketStore>((set) => ({
                 root_cause: ''
             }
         });
-        if (ticket.name) useTicketStore.getState().fetchCustomerByName(ticket.name);
+        if (ticket.nama) useTicketStore.getState().fetchCustomerByName(ticket.nama);
     },
 
     reset: () => set({
-            step: 1,
-            selectedUser: null,
-            formData: INITIAL_FORM_DATA,
-        })
-    }));
+        step: 1,
+        selectedUser: null,
+        formData: INITIAL_FORM_DATA,
+    })
+}));

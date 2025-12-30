@@ -28,51 +28,50 @@ export const TicketCompatibilitySchema = z.object({
 });
 
 export const DefaultFormSchema = TicketCompatibilitySchema.extend({
-    name: z.string(),
-    address: z.string(),
-    description: z.string(),
-    PIC: z.string(),
+    name: z.string().optional(),
+    address: z.string().optional(),
+    description: z.string().optional(),
+    PIC: z.string().optional(),
 })
 
 export const TicketFormSchema = DefaultFormSchema.extend({
-    interface: z.string(),
-    onu_sn: z.string(),
+    interface: z.string().optional(),
+    onu_sn: z.string().optional(),
 })
 
 export const CreateTicketFormSchema = DefaultFormSchema.extend({
-    olt_name: z.string(),
-    user_pppoe: z.string(),
-    ticketRef: z.string(),
-    priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
-    type: z.enum(['FREE', 'CHARGED']),
+    olt_name: z.string().optional(),
+    user_pppoe: z.string().optional(),
+    ticketRef: z.string().optional(),
+    priority: z.string().optional(),
+    type: z.string().optional(),
 })
 
 export const OpenTicketFormSchema = TicketFormSchema.extend({
-    olt_name: z.string(),
-    action_ticket: z.string(),
+    olt_name: z.string().optional(),
+    action_ticket: z.string().optional(),
+    PIC: z.string().optional(),
+    onu_sn: z.string().optional(),
 })
 
 export const ForwardTicketFormSchema = TicketFormSchema.extend({
-    last_action: z.string(),
-    service_impact: z.string(),
-    root_cause: z.string(),
-    network_impact: z.string(),
-    priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
-    person_in_charge: z.string(),
-    recomended_action: z.string(),
+    last_action: z.string().optional(),
+    service_impact: z.string().optional(),
+    root_cause: z.string().optional(),
+    network_impact: z.string().optional(),
+    priority: z.string().optional(),
+    person_in_charge: z.string().optional(),
+    recomended_action: z.string().optional(),
 })
 
 // For CloseTicketFormSchema, we use ticketCompatibilitySchema as base to ensure all props exist,
 // then merge the specific picked fields (making them required), then extend with action_close.
-export const CloseTicketFormSchema = TicketCompatibilitySchema.merge(
-    TicketFormSchema.pick({
-        name: true,
-        address: true,
-        onu_sn: true,
-        PIC: true,
-    })
-).extend({
-    action_close: z.string(),
+export const CloseTicketFormSchema = TicketCompatibilitySchema.extend({
+    name: z.string().optional(),
+    address: z.string().optional(),
+    onu_sn: z.string().optional(),
+    PIC: z.string().optional(),
+    action_close: z.string().optional(),
 })
 
 export type DefaultFormData = z.infer<typeof DefaultFormSchema>;
@@ -111,14 +110,14 @@ export function CreateTicketFormFields() {
                     name="priority"
                     label="Priority"
                     component="Select"
-                    items={PRIORITY_OPTIONS} // Cleaner
+                    items={PRIORITY_OPTIONS}
                 />
 
                 <FieldWrapper
                     name="type"
                     label="Type"
                     component="Select"
-                    items={TICKET_TYPE_OPTIONS} // Cleaner
+                    items={TICKET_TYPE_OPTIONS}
                 />
             </div>
 
@@ -144,6 +143,7 @@ export function OpenTicketFormFields() {
             </div>
             <FieldWrapper name="action_ticket" label="Action Ticket" component="Input" placeholder='cek' />
             <FieldWrapper name="description" label="Description" component="Textarea" />
+            <FieldWrapper name="PIC" label="PIC" component="Input" readOnly />
         </div>
     );
 }
@@ -176,6 +176,7 @@ export function ForwardTicketFormFields() {
                 <FieldWrapper name="person_in_charge" label="Person In Charge" component="Input" readOnly />
             </div>
             <FieldWrapper name="recomended_action" label="Recommended Action" component="Textarea" />
+            <FieldWrapper name="PIC" label="PIC" component="Input" readOnly />
         </div>
     );
 }

@@ -13,23 +13,25 @@ export function FormBase({ children, label, description, field, className }: any
     return (
         <div className={cn("space-y-2", className)}>
             {label && (
-                <Label 
-                    htmlFor={field.name} 
+                <Label
+                    htmlFor={field.name}
                     className={error ? "text-destructive" : ""}
                 >
                     {label}
                 </Label>
             )}
-            
+
             {children}
-            
+
             {description && (
                 <p className="text-sm text-muted-foreground">{description}</p>
             )}
-            
+
             {error && (
                 <p className="text-sm font-medium text-destructive">
-                    {String(error)}
+                    {typeof error === 'object' && error !== null
+                        ? (error.message || JSON.stringify(error))
+                        : String(error)}
                 </p>
             )}
         </div>

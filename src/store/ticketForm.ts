@@ -34,7 +34,7 @@ const safeType = (val?: string) => {
 export const useTicketForm = (mode: TicketMode) => {
   // 3. Get QueryClient to refresh data
   const queryClient = useQueryClient();
-  
+
   // API Hooks
   const createMutation = useCreateAndProcessTicketApiV1TicketCreateAndProcessPost()
   const openMutation = useProcessTicketOnlyApiV1TicketProcessPost()
@@ -45,14 +45,14 @@ export const useTicketForm = (mode: TicketMode) => {
 
   // 4. Shared "On Success" logic
   // This ensures that NO MATTER which action you take, the ticket list refreshes
-  const handleSuccess = () => {
-     queryClient.invalidateQueries({ queryKey: ['tickets'] }); // Adjust 'tickets' to match your generated QueryKey
+  const handleSuccess = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['tickets'] });
   }
 
   return useMemo(() => {
     const commonProps = {
-        noc_username: user?.username || '',
-        noc_password: user?.password || '',
+      noc_username: user?.username || '',
+      noc_password: user?.password || '',
     }
 
     switch (mode) {
@@ -65,13 +65,19 @@ export const useTicketForm = (mode: TicketMode) => {
           submitLabel: 'Process Ticket',
           variant: 'default' as const,
           execute: async (data: TicketFormData) => {
+            const target = data.user_pppoe || data.name || '';
+            const action = data.action_ticket || 'cek';
+
+            // Combine them (or just use target if your backend expects that)
+            const finalQuery = `${action} ${target}`.trim();
+
             const res = await openMutation.mutateAsync({
               data: {
-                query: data.name || data.user_pppoe || '',
+                query: finalQuery,
                 ...commonProps,
               }
             });
-            handleSuccess();
+            await handleSuccess();
             return res;
           },
         }
@@ -87,7 +93,7 @@ export const useTicketForm = (mode: TicketMode) => {
           execute: async (data: TicketFormData) => {
             const iface = data.interface?.trim()
             const onuIndex = iface ? `gpon-onu_${iface}` : ''
-            
+
             const res = await forwardMutation.mutateAsync({
               data: {
                 query: data.ticketRef || '',
@@ -97,13 +103,12 @@ export const useTicketForm = (mode: TicketMode) => {
                 recomended_action: data.recomended_action || '-',
                 onu_index: onuIndex,
                 sn_modem: data.onu_sn || '',
-                // USE SAFE MAPPER
-                priority: safePriority(data.priority) as any, 
+                priority: safePriority(data.priority) as any,
                 person_in_charge: data.person_in_charge || 'ALL TECHNICIAN',
                 ...commonProps,
               }
             });
-            handleSuccess();
+            await handleSuccess();
             return res;
           },
         }
@@ -125,7 +130,7 @@ export const useTicketForm = (mode: TicketMode) => {
                 ...commonProps,
               }
             });
-            handleSuccess();
+            await handleSuccess();
             return res;
           },
         }
@@ -150,14 +155,14 @@ export const useTicketForm = (mode: TicketMode) => {
                 ...commonProps,
               }
             });
-            handleSuccess();
+            await handleSuccess();
             return res;
           },
         }
     }
   }, [
-    mode, 
-    createMutation, openMutation, forwardMutation, closeMutation, 
+    mode,
+    createMutation, openMutation, forwardMutation, closeMutation,
     user,
     queryClient // Add to dependencies
   ])

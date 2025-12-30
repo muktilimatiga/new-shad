@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -37,6 +37,8 @@ interface AutoTanStackTableProps<T> {
   pageSizeOptions?: number[];
   columnOverrides?: Partial<Record<keyof T | "actions", ColumnDef<T>>>;
   visibleColumns?: (keyof T)[];
+  /** Columns to show on mobile (< 768px). If not provided, uses visibleColumns. */
+  mobileColumns?: (keyof T | "actions")[];
 
   title?: string;
   description?: string;
@@ -64,6 +66,7 @@ export function AutoTanStackTable<T extends object>({
   pageSizeOptions = [10, 20, 50, 100],
   columnOverrides = {},
   visibleColumns,
+  mobileColumns,
 
   title,
   description,
@@ -82,6 +85,16 @@ export function AutoTanStackTable<T extends object>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [internalGlobalFilter, setInternalGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const globalFilter =
     typeof searchValue === "string" ? searchValue : internalGlobalFilter;
@@ -95,9 +108,16 @@ export function AutoTanStackTable<T extends object>({
     if (!data || data.length === 0) return [];
 
     const allKeys = Object.keys(data[0]) as (keyof T)[];
-    const keys = visibleColumns
-      ? visibleColumns.filter((k) => allKeys.includes(k))
-      : allKeys;
+
+    // Determine which columns to show based on screen size
+    const activeColumns = isMobile && mobileColumns
+      ? mobileColumns.filter((k) => k === "actions" || allKeys.includes(k as keyof T))
+      : visibleColumns
+        ? visibleColumns.filter((k) => allKeys.includes(k))
+        : allKeys;
+
+    // Filter out "actions" for the main column generation (handled separately)
+    const keys = activeColumns.filter((k) => k !== "actions") as (keyof T)[];
 
     const generated: ColumnDef<T>[] = keys.map((key) => {
       if (columnOverrides[key]) return columnOverrides[key]!;
@@ -120,7 +140,11 @@ export function AutoTanStackTable<T extends object>({
             val.length >= 10
           ) {
             const d = new Date(val);
-            if (!isNaN(d.getTime())) return d.toLocaleString();
+            if (!isNaN(d.getTime())) {
+              // Check if it's a date-only string (no time component)
+              const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(val);
+              return isDateOnly ? d.toLocaleDateString() : d.toLocaleString();
+            }
           }
           if (val === null || val === undefined) return "";
           return String(val);
@@ -128,10 +152,14 @@ export function AutoTanStackTable<T extends object>({
       };
     });
 
-    if (columnOverrides["actions"]) generated.push(columnOverrides["actions"] as any);
+    // Add actions column if it's in the active columns (or if not in mobile mode and it exists)
+    const showActions = activeColumns.includes("actions" as any) || (!isMobile && columnOverrides["actions"]);
+    if (showActions && columnOverrides["actions"]) {
+      generated.push(columnOverrides["actions"] as any);
+    }
 
     return generated;
-  }, [data, columnOverrides, visibleColumns]);
+  }, [data, columnOverrides, visibleColumns, mobileColumns, isMobile]);
 
   function detectFilterMeta(value: unknown): ColumnMeta<any, any> {
     if (typeof value === "string") {

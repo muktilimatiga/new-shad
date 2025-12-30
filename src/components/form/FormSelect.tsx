@@ -28,7 +28,9 @@ export function FormSelect({
                 }}
             >
                 <SelectTrigger aria-invalid={isInvalid} id={field.name}>
-                    <SelectValue />
+                    <SelectValue>
+                        {field.state.value || <span className="text-muted-foreground">{placeholder}</span>}
+                    </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                     {children}

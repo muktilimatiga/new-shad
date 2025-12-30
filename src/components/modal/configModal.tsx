@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
-} from "~/components/ui/dialog"; 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter
+} from "~/components/ui/dialog";
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 
 import { toast } from "sonner"
-import { X, RefreshCw, Trash2, Layers } from 'lucide-react';
+import { X, RefreshCw, Trash2, Layers, Loader2 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 
 // Hooks
@@ -47,13 +47,13 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
 
     // 2. Local Search State (Replaces useFiberStore)
     const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
+    const debouncedSearchTerm = useDebouncedValue(searchTerm, 500);
 
     // This handles loading, error, and caching automatically using React Query
-    const { 
-        data: searchResults = [], 
+    const {
+        data: searchResults = [],
         isFetching: isSearchingCustomers,
-        refetch: refetchCustomers 
+        refetch: refetchCustomers
     } = useCustomersView(debouncedSearchTerm); //
 
     // 4. Other APIs
@@ -64,7 +64,7 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
     } = usePsbData();
 
     const { mutateAsync: scanOnts, isPending: isScanning } = useScanOnts();
-    
+
     const currentType = type === 'batch' ? 'batch' : type === 'bridge' ? 'bridge' : mode;
     const { FormFields, schema, execute, submitLabel } = useConfigMutation(currentType, selectedOlt);
 
@@ -79,7 +79,7 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
             olt_name: '', modem_type: '', onu_sn: '', package: '',
             name: '', address: '', user_pppoe: '',
             pass_pppoe: '',
-            eth_locks: [true],
+            eth_locks: true,
             vlan_id: '',
             data_psb: '',
             fiber_source_id: ''
@@ -120,7 +120,7 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
             form.setFieldValue('address', selected.alamat || '');
             form.setFieldValue('user_pppoe', selected.user_pppoe || '');
             form.setFieldValue('pass_pppoe', selected.pppoe_password || selected.pass_pppoe || '');
-            
+
             // Optional: Reset search after selection
             setSearchTerm('');
         }
@@ -131,58 +131,67 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
         if (selected) {
             form.setFieldValue('name', selected.name || '');
             form.setFieldValue('address', selected.address || '');
-            form.setFieldValue('user_pppoe', selected.user_pppoe || '');
-            form.setFieldValue('pass_pppoe', selected.pppoe_password || '');
-            if (selected.paket) form.setFieldValue('package', selected.paket);
+            // @ts-ignore - package might not be in DataPSB type definition yet
+            if (selected.paket || selected.package) form.setFieldValue('package', selected.paket || selected.package || '');
         }
     };
 
     const handleScan = async () => {
-        if (!selectedOlt) return toast.error("Select OLT first");
+        const oltName = form.getFieldValue('olt_name');
+        if (!oltName) return toast.error("Please select OLT first");
+
         try {
-            const res = await scanOnts(selectedOlt);
-            setDetectedOnts(res || []);
-            if (currentType !== 'batch' && res?.length) form.setFieldValue('onu_sn', res[0].sn);
-            toast.success(`Found ${res?.length || 0} devices`);
-        } catch {
+            const onts = await scanOnts(oltName);
+            setDetectedOnts(onts || []);
+
+            if (onts && onts.length > 0) {
+                toast.success(`Found ${onts.length} devices`);
+                // Auto-select first device if strictly 1 found and not batch mode
+                if (type !== 'batch' && onts.length === 1) {
+                    form.setFieldValue('onu_sn', onts[0].sn);
+                }
+            } else {
+                toast.info("No devices found");
+            }
+        } catch (e) {
             toast.error("Scan failed");
         }
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-            <DialogContent className="max-w-xl p-0 gap-0 overflow-hidden bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 shadow-2xl">
-                
+            <DialogContent showCloseButton={false} className="sm:max-w-lg w-[60vw] max-h-[90vh] flex flex-col p-0 gap-0">
+
                 {/* Header */}
-                <DialogHeader className="px-6 py-4 border-b flex flex-row justify-between items-center space-y-0 bg-white dark:bg-zinc-900">
+                <DialogHeader className="px-6 py-4 border-b flex flex-row justify-between items-center space-y-0 bg-background">
                     <DialogTitle className="text-lg font-bold">
                         {mode === 'manual' ? 'Manual' : 'Auto (API)'}
                     </DialogTitle>
-                    
+
                     <div className="flex items-center gap-4">
                         {type !== 'batch' && type !== 'bridge' && (
-                            <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 p-1 pr-3 rounded-full border">
+                            <div className="flex items-center gap-2 bg-muted p-1 pr-3 rounded-full">
                                 <Switch checked={mode === 'manual'} onCheckedChange={(c) => setMode(c ? 'manual' : 'auto')} className="scale-75" />
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                                     {mode === 'manual' ? 'Manual' : 'Auto'}
                                 </span>
                             </div>
                         )}
-                        <button onClick={handleClose} className="text-slate-400 hover:text-slate-600">
+                        <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
                             <X className="h-5 w-5" />
                         </button>
                     </div>
                 </DialogHeader>
 
                 {/* Content */}
-                <div className="p-5 overflow-y-auto max-h-[75vh]">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6">
                     <FormProvider value={form}>
                         {/* Sync OLT */}
                         <form.Subscribe
                             selector={(state) => state.values.olt_name}
                             children={(olt) => <EffectSync value={olt} onChange={setSelectedOlt} />}
                         />
-                        
+
                         {/* Sync PSB Selection */}
                         <form.Subscribe
                             selector={(state) => state.values.data_psb}
@@ -199,28 +208,28 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
                             detectedOnts={detectedOnts}
                             onScan={handleScan}
                             isScanning={isScanning}
-                            
+
                             // Auto Mode Props
                             psbList={psbList}
                             fetchPsbData={refetchPsb}
                             isFetchingPSB={isRefetchingPsb}
                             selectPSBList={handleSelectPsb}
-                            
-                            // Manual Mode Props (Now using React Query)
+
+                            // Manual Mode Props
                             selectUser={handleSelectUser}
-                            fiberList={searchResults}         // Data from useCustomersView
-                            fiberSearchTerm={searchTerm}      // Local state
-                            setFiberSearchTerm={setSearchTerm}// Local setter
-                            isSearchingFiber={isSearchingCustomers} // Loading state
-                            onFiberSearch={() => refetchCustomers()} // Trigger (optional due to debounce)
+                            customerList={searchResults}
+                            customerSearchTerm={debouncedSearchTerm}
+                            setCustomerSearchTerm={setSearchTerm}
+                            isSearchingCustomer={isSearchingCustomers}
+                            onCustomerSearch={() => refetchCustomers()}
                         />
                     </FormProvider>
 
                     {/* Batch Queue UI */}
                     {type === 'batch' && (
-                        <div className="mt-6 space-y-3 pt-4 border-t border-slate-100">
+                        <div className="mt-6 space-y-3 pt-4 border-t border-border">
                             <div className="flex justify-between items-end">
-                                <h3 className="text-xs font-bold uppercase text-slate-500">Queue ({batchQueue.length})</h3>
+                                <h3 className="text-xs font-bold uppercase text-muted-foreground">Queue ({batchQueue.length})</h3>
                                 <Button variant="outline" size="sm" onClick={handleScan} disabled={isScanning} className="h-8 text-xs">
                                     <RefreshCw className={cn("h-3 w-3 mr-2", isScanning && "animate-spin")} />
                                     Scan
@@ -229,9 +238,9 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
 
                             {/* Add to Queue */}
                             {detectedOnts.length > 0 && (
-                                <div className="p-2 bg-blue-50 border border-blue-200 rounded-lg animate-in fade-in">
+                                <div className="p-2 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-lg animate-in fade-in">
                                     <select
-                                        className="w-full text-xs bg-transparent border-none outline-none text-blue-700 font-medium cursor-pointer"
+                                        className="w-full text-xs bg-transparent border-none outline-none text-blue-700 dark:text-blue-400 font-medium cursor-pointer"
                                         onChange={(e) => {
                                             const sn = e.target.value;
                                             if (!sn) return;
@@ -251,28 +260,28 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
                             )}
 
                             {/* Queue List */}
-                            <div className="border rounded-lg overflow-hidden bg-slate-50/50 min-h-[150px]">
+                            <div className="border rounded-lg overflow-hidden bg-muted/40 min-h-[150px]">
                                 {batchQueue.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-8 text-slate-400 gap-2">
+                                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
                                         <Layers className="h-8 w-8 opacity-20" />
                                         <p className="text-xs">Queue is empty</p>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-slate-100">
+                                    <div className="divide-y divide-border">
                                         {batchQueue.map((item, idx) => (
-                                            <div key={item.sn} className="flex items-center justify-between p-2.5 bg-white text-xs hover:bg-slate-50">
+                                            <div key={item.sn} className="flex items-center justify-between p-2.5 bg-background text-xs hover:bg-muted/50">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="h-6 w-6 rounded bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-[10px]">
+                                                    <div className="h-6 w-6 rounded bg-muted flex items-center justify-center text-muted-foreground font-bold text-[10px]">
                                                         {idx + 1}
                                                     </div>
                                                     <div>
-                                                        <div className="font-mono font-bold text-slate-700">{item.sn}</div>
-                                                        <div className="text-[10px] text-slate-400">Port {item.port}</div>
+                                                        <div className="font-mono font-bold text-foreground">{item.sn}</div>
+                                                        <div className="text-[10px] text-muted-foreground">Port {item.port}</div>
                                                     </div>
                                                 </div>
                                                 <button
                                                     onClick={() => removeFromBatch(item.sn)}
-                                                    className="h-6 w-6 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded"
+                                                    className="h-6 w-6 flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </button>
@@ -286,13 +295,20 @@ export const ConfigModal = ({ isOpen, onClose, type }: ConfigModalProps) => {
                 </div>
 
                 {/* Footer */}
-                <DialogFooter className="p-4 border-t flex justify-end gap-3 bg-slate-50/30">
-                    <Button variant="outline" onClick={handleClose}>Cancel</Button>
-                    <Button 
-                        onClick={(e) => { e.preventDefault(); form.handleSubmit(); }} 
-                        disabled={form.state.isSubmitting} 
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md"
+                <DialogFooter className="px-6 py-6 border-t flex-shrink-0 bg-muted/40">
+                    <Button
+                        variant="ghost"
+                        onClick={handleClose}
+                        className="h-11 px-8 font-medium text-muted-foreground hover:text-foreground"
                     >
+                        Cancel
+                    </Button>
+                    <Button
+                        onClick={(e) => { e.preventDefault(); form.handleSubmit(); }}
+                        disabled={form.state.isSubmitting}
+                        className="h-11 px-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-md font-semibold"
+                    >
+                        {form.state.isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                         {form.state.isSubmitting ? "Processing..." : submitLabel}
                     </Button>
                 </DialogFooter>

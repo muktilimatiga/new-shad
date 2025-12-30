@@ -182,6 +182,8 @@ export const TicketSchema = z.object({
   nama: z.string(), // nama
   PIC: z.string(),
   createdAt: z.string(), // ISO or yyyy-mm-dd
+  waktu: z.string().optional(), // Time field
+  tanggal: z.string().optional(), // Date field
 })
 
 export const TicketLogSchema = z.object({

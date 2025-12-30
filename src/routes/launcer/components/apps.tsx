@@ -34,15 +34,15 @@ export const APPS_CONFIG: AppItem[] = [
     isAction: true
   },
   {
-    id: 'ocr',
-    title: 'Images to Text',
-    subtitle: 'Convert images to text',
-    icon: Image,
-    to: '/ocr',
-    // Solid card
+    id: 'tickets',
+    title: 'Log Ticket',
+    subtitle: 'Ticket management',
+    icon: Tag,
+    to: '/log-komplain',
     color: 'bg-card border border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all',
     iconColor: 'text-blue-600'
   },
+
   {
     id: 'broadband',
     title: 'Broadband',
@@ -53,13 +53,23 @@ export const APPS_CONFIG: AppItem[] = [
     iconColor: 'text-zinc-500'
   },
   {
-    id: 'database',
-    title: 'Database',
-    subtitle: 'Data management',
+    id: 'OLT',
+    title: 'OLT',
+    subtitle: 'OLT Management',
     icon: Database,
-    to: '/database',
+    to: '/epon',
     color: 'bg-card border border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all',
     iconColor: 'text-zinc-500'
+  },
+  {
+    id: 'ocr',
+    title: 'Images to Text',
+    subtitle: 'Convert images to text',
+    icon: Image,
+    to: '/ocr',
+    // Solid card
+    color: 'bg-card border border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all',
+    iconColor: 'text-blue-600'
   },
   {
     id: 'logs',
@@ -78,15 +88,6 @@ export const APPS_CONFIG: AppItem[] = [
     to: '/topology',
     color: 'bg-card border border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all',
     iconColor: 'text-zinc-500'
-  },
-  {
-    id: 'tickets',
-    title: 'Log Ticket',
-    subtitle: 'Ticket management',
-    icon: Tag,
-    to: '/log-komplain',
-    color: 'bg-card border border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all',
-    iconColor: 'text-blue-600'
   },
   {
     id: 'empty',

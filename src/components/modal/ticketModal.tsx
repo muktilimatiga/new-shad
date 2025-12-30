@@ -4,13 +4,13 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Avatar, AvatarFallback } from '../ui/avatar';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
-} from "~/components/ui/dialog"; 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter
+} from "~/components/ui/dialog";
 import { toast } from 'sonner';
 
 // Hooks & Stores
@@ -39,13 +39,13 @@ export const TicketModal = ({ isOpen, onClose, mode, ticketData }: TicketModalPr
 
     // 2. Local Search State (Managed by React Query now)
     const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearchTerm] = useDebouncedValue(searchTerm, 500);
-    
+    const debouncedSearchTerm = useDebouncedValue(searchTerm, 500);
+
     // The Hook handles the fetching automatically!
-    const { data: searchResults = [], isLoading: isSearching } = useCustomersView(debouncedSearchTerm); 
+    const { data: searchResults = [], isLoading: isSearching } = useCustomersView(debouncedSearchTerm);
 
     // 3. Strategy & Actions
-    const { title, FormFields, schema, mutation, submitLabel, variant, execute } = useTicketForm(mode);
+    const { title, FormFields, submitLabel, variant, execute } = useTicketForm(mode);
     const onSuccessAction = useActionSuccess();
     const onErrorAction = useActionError();
 
@@ -57,7 +57,7 @@ export const TicketModal = ({ isOpen, onClose, mode, ticketData }: TicketModalPr
             action_ticket: '', action_close: '', last_action: '', service_impact: '',
             root_cause: '', network_impact: '', person_in_charge: '', recomended_action: '', PIC: ''
         },
-        validators: { onChange: schema as any },
+        // No validators - form is gimmick, backend handles validation
         onSubmit: async ({ value }) => {
             try {
                 await execute(value);
@@ -69,6 +69,7 @@ export const TicketModal = ({ isOpen, onClose, mode, ticketData }: TicketModalPr
                     onDone: handleClose,
                 });
             } catch (error) {
+                console.error(error);
                 toast.error("An error occurred");
                 console.error(error);
                 onErrorAction(error as any, mode === 'create' ? "create" : "update", "ticket");
@@ -86,7 +87,7 @@ export const TicketModal = ({ isOpen, onClose, mode, ticketData }: TicketModalPr
                 setStep(1);
             } else if (ticketData) {
                 initializeFromTicket(ticketData);
-                
+
                 // Hydrate Form (Shortened for brevity - logic remains the same)
                 form.reset({
                     name: ticketData.nama || ticketData.name || "",
@@ -99,7 +100,6 @@ export const TicketModal = ({ isOpen, onClose, mode, ticketData }: TicketModalPr
                     onu_sn: ticketData.sn_modem || ticketData.onu_sn || "",
                     interface: ticketData.interface || "",
                     type: ticketData.type || "FREE",
-                    // Hidden/Action fields default to "-" or empty to pass validation
                     action_ticket: "-", action_close: ticketData.action_close || "-",
                     last_action: ticketData.last_action || "-", service_impact: ticketData.service_impact || "-",
                     root_cause: ticketData.root_cause || "-", network_impact: ticketData.network_impact || "-",
@@ -115,28 +115,27 @@ export const TicketModal = ({ isOpen, onClose, mode, ticketData }: TicketModalPr
     }, [isOpen, mode, ticketData]);
 
     // Sync Store Data to Form (e.g. after selecting a user)
-useEffect(() => {
+    useEffect(() => {
         if (step === 2 && formData && formData.name) {
             form.reset({
-                // Spread the data first
                 ...formData,
 
                 // Then FORCE overrides for every nullable field to ensure they are Strings
                 name: formData.name || '',
                 address: formData.address || '',
                 description: formData.description || '',
-                
+
                 // Technical
                 olt_name: formData.olt_name || '',
                 user_pppoe: formData.user_pppoe || '',
                 onu_sn: formData.onu_sn || '',
                 interface: formData.interface || '',
-                
+
                 // Meta & Enums (Provide safe defaults!)
                 ticketRef: formData.ticketRef || '',
                 priority: formData.priority || 'Low',
                 type: formData.type || 'FREE',
-                
+
                 // Actions / Hidden fields
                 action_ticket: formData.action_ticket || '',
                 action_close: formData.action_close || '',
@@ -154,9 +153,9 @@ useEffect(() => {
 
     const handleClose = () => {
         onClose();
-        setTimeout(() => { 
-            resetStore(); 
-            setSearchTerm(""); 
+        setTimeout(() => {
+            resetStore();
+            setSearchTerm("");
         }, 200);
     };
 
@@ -167,15 +166,14 @@ useEffect(() => {
     };
 
     const handleSelectCustomer = (c: any) => {
-        // We pass the "CustomerView" object directly to the store
         selectUser(c);
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
             {/* Layout: Fixed Header/Footer, Scrollable Body */}
-            <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-                
+            <DialogContent className="max-w-2xl max-h-[100vh] flex flex-col p-0 gap-0 overflow-hidden">
+
                 {/* 1. HEADER */}
                 <DialogHeader className="px-6 py-4 border-b bg-card/50">
                     <DialogTitle>{title}</DialogTitle>
@@ -190,12 +188,12 @@ useEffect(() => {
                                 <Label>Find Customer</Label>
                                 <div className="relative">
                                     <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <Input 
-                                        value={searchTerm} 
-                                        onChange={e => setSearchTerm(e.target.value)} 
-                                        className="pl-9" 
-                                        placeholder="Search name, pppoe, address..." 
-                                        autoFocus 
+                                    <Input
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
+                                        className="pl-9"
+                                        placeholder="Search name, pppoe, address..."
+                                        autoFocus
                                     />
                                 </div>
                             </div>
@@ -204,10 +202,10 @@ useEffect(() => {
                                 {searchResults.map((c) => (
                                     <div key={c.id} onClick={() => handleSelectCustomer(c)} className="p-2 hover:bg-muted rounded cursor-pointer flex gap-3 items-center">
                                         <Avatar className="h-8 w-8 text-xs">
-                                            <AvatarFallback>{c.name?.[0]}</AvatarFallback>
+                                            <AvatarFallback>{(c.nama || c.name)?.[0]}</AvatarFallback>
                                         </Avatar>
                                         <div>
-                                            <p className="text-sm font-medium">{c.name}</p>
+                                            <p className="text-sm font-medium">{c.nama || c.name}</p>
                                             <p className="text-xs text-muted-foreground">
                                                 {c.user_pppoe} • {c.alamat}
                                             </p>
@@ -225,7 +223,7 @@ useEffect(() => {
                                 <CustomerCard
                                     user={{
                                         id: selectedUser.id?.toString() || '',
-                                        name: selectedUser.name || '',
+                                        name: selectedUser.nama || selectedUser.name || '',
                                         user_pppoe: selectedUser.user_pppoe || '',
                                         pass_pppoe: selectedUser.pppoe_password || undefined,
                                         alamat: selectedUser.alamat || '',
@@ -258,7 +256,7 @@ useEffect(() => {
                 {/* 3. FOOTER */}
                 {(step === 2 || mode !== 'create') && (
                     <DialogFooter className="p-6 pt-4 border-t bg-background">
-                        <Button variant="outline" onClick={handleClose} disabled={mutation.isPending}>
+                        <Button variant="outline" onClick={handleClose} disabled={form.state.isSubmitting}>
                             Cancel
                         </Button>
                         <Button
@@ -267,10 +265,10 @@ useEffect(() => {
                                 e.stopPropagation();
                                 form.handleSubmit();
                             }}
-                            disabled={mutation.isPending}
+                            disabled={form.state.isSubmitting}
                             variant={variant}
                         >
-                            {mutation.isPending ? (
+                            {form.state.isSubmitting ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     Processing...

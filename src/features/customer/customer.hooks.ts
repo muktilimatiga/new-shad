@@ -11,5 +11,6 @@ export function useCustomersView(searchTerm: string = "") {
     queryFn: () => listCustomersView({ searchTerm: normalized, limit: 50 }),
     staleTime: 30_000,
     refetchOnWindowFocus: true,
+    enabled: normalized.length >= 2, // Only fetch when search term has at least 2 characters
   });
 }
