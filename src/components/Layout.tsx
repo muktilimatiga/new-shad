@@ -535,6 +535,11 @@ export const AppLayout = () => {
   const { theme, fetchUser } = useAppStore()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Get current path to determine layout mode
+  const routerState = useRouterState()
+  const currentPath = routerState.location.pathname
+  const isEponPage = currentPath.startsWith('/epon')
+
   // Effect 1: Handle Theme (runs when theme changes)
   useEffect(() => {
     const root = window.document.documentElement
@@ -554,14 +559,17 @@ export const AppLayout = () => {
         isOpen={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
       />
-      <Navbar onOpenMobileMenu={() => setMobileMenuOpen(true)} />
-      <NotificationDropdown />
+
+      {!isEponPage && <Navbar onOpenMobileMenu={() => setMobileMenuOpen(true)} />}
+
+      {!isEponPage && <NotificationDropdown />}
 
       <main
         className={cn(
           'min-h-screen transition-all duration-300 ease-in-out',
-          'pt-24 pb-12 px-4 md:px-8',
-          'pl-4 md:pl-8',
+          isEponPage
+            ? 'p-0 h-screen w-full overflow-hidden' // Fullscreen for EPON
+            : 'pt-24 pb-12 px-4 md:px-8 pl-4 md:pl-8' // Standard layout
         )}
       >
         <Outlet />
