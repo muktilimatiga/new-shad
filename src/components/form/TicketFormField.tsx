@@ -94,36 +94,37 @@ export const TICKET_TYPE_OPTIONS = [
 
 export function CreateTicketFormFields() {
     return (
-        <div className="form-content">
-            <FieldWrapper name="name" label="Customer Name" component="Input" />
-            <FieldWrapper name="address" label="Customer Address" component="Input" />
+        <div className="space-y-4 pt-2">
+            <div className="grid gap-4">
+                <FieldWrapper name="name" label="Customer Name" component="Input" />
+                <FieldWrapper name="address" label="Customer Address" component="Input" />
+            </div>
 
-            <div className="form-content-grid-2">
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper name="olt_name" label="OLT Name" component="Input" />
                 <FieldWrapper name="user_pppoe" label="User PPPOE" component="Input" />
             </div>
 
-            <div className="form-content-grid-3">
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper name="ticketRef" label="Reference" component="Input" readOnly />
-
                 <FieldWrapper
                     name="priority"
                     label="Priority"
                     component="Select"
                     items={PRIORITY_OPTIONS}
                 />
-
-                <FieldWrapper
-                    name="type"
-                    label="Type"
-                    component="Select"
-                    items={TICKET_TYPE_OPTIONS}
-                />
             </div>
 
             <FieldWrapper
+                name="type"
+                label="Type"
+                component="Select"
+                items={TICKET_TYPE_OPTIONS}
+            />
+
+            <FieldWrapper
                 name="description"
-                label="Problem Description"
+                label="Kendala"
                 component="Textarea"
                 rows={4}
             />
@@ -134,10 +135,12 @@ export function CreateTicketFormFields() {
 
 export function OpenTicketFormFields() {
     return (
-        <div className="form-content">
-            <FieldWrapper name="name" label="Full Name" component="Input" />
-            <FieldWrapper name="address" label="Address" component="Input" />
-            <div className="form-content-grid-2">
+        <div className="space-y-4 pt-2">
+            <div className="grid gap-4">
+                <FieldWrapper name="name" label="Full Name" component="Input" />
+                <FieldWrapper name="address" label="Address" component="Input" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper name="olt_name" label="OLT Name" component="Input" />
                 <FieldWrapper name="interface" label="Interface" component="Input" />
             </div>
@@ -150,23 +153,25 @@ export function OpenTicketFormFields() {
 
 export function ForwardTicketFormFields() {
     return (
-        <div className="form-content">
-            <FieldWrapper name="name" label="Customer Name" component="Input" />
-            <FieldWrapper name="address" label="Alamat" component="Input" />
-            <div className="form-content-grid-2">
+        <div className="space-y-4 pt-2">
+            <div className="grid gap-4">
+                <FieldWrapper name="name" label="Customer Name" component="Input" />
+                <FieldWrapper name="address" label="Alamat" component="Input" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper name="description" label="Description" component="Input" readOnly />
                 <FieldWrapper name="last_action" label="Last Action" component="Input" readOnly />
             </div>
             <FieldWrapper name="service_impact" label="Service Impact" component="Input" />
-            <div className="form-content-grid-2">
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper name="root_cause" label="Root Cause" component="Input" />
                 <FieldWrapper name="network_impact" label="Network Impact" component="Input" />
             </div>
-            <div className="form-content-grid-2">
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper name="interface" label="Interface" component="Input" />
                 <FieldWrapper name="onu_sn" label="ONU SN" component="Input" />
             </div>
-            <div className="form-content-grid-2">
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper
                     name="priority"
                     label="Priority"
@@ -183,16 +188,17 @@ export function ForwardTicketFormFields() {
 
 export function CloseTicketFormFields() {
     return (
-        <div className="form-content">
-            <FieldWrapper name="name" label="Full Name" component="Input" readOnly />
-            <FieldWrapper name="address" label="Address" component="Input" readOnly />
-            <div className="form-content-grid-2">
+        <div className="space-y-4 pt-2">
+            <div className="grid gap-4">
+                <FieldWrapper name="name" label="Full Name" component="Input" readOnly />
+                <FieldWrapper name="address" label="Address" component="Input" readOnly />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
                 <FieldWrapper name="olt_name" label="OLT Name" component="Input" readOnly />
                 <FieldWrapper name="onu_sn" label="ONU SN" component="Input" readOnly />
             </div>
             <FieldWrapper name="action_close" label="Closing Action" component="Textarea" />
             <FieldWrapper name="PIC" label="PIC" component="Input" readOnly />
         </div>
-
     );
 }

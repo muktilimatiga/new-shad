@@ -13,7 +13,17 @@ import {
   Forward,
   Plus,
   Filter,
+  MoreHorizontal,
+  SquareCheckBig,
+  XSquare,
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '~/components/ui/dropdown-menu'
+import { ActionMenuItem } from '~/routes/broadband/components/ActionMenuItem'
+import { TicketStatsCards } from './components/TicketStatsCards'
 import { useTicketStore, type TicketMode } from '~/store/ticketStore'
 import { useKomplainView } from '~/features/ticket/ticket.hooks'
 import { ColumnFilter } from '~/components/columnFilter'
@@ -137,66 +147,80 @@ const LogTicketPage = () => {
         cell: ({ row }: any) => {
           const t = row.original as Ticket
 
-          // Handler defined inside cell to access 'row'
-          const handleAction = (e: React.MouseEvent, mode: TicketMode) => {
-            e.preventDefault()
-            e.stopPropagation()
-            openModal(mode, t)
-          }
-
           return (
-            <div className="flex items-center justify-end gap-2">
-              {/* ACTION: PROCESS (Mode: open) */}
-              {t.status === 'open' && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="relative z-50 h-7 px-2 text-[10px] gap-1 text-indigo-600 border-indigo-200 hover:bg-indigo-50 dark:border-indigo-900 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
-                  onClick={(e) => handleAction(e, 'open')}
-                >
-                  Process <ArrowRight className="h-3 w-3" />
-                </Button>
-              )}
-
-              {/* ACTION: FORWARD (Mode: forward) */}
-              {t.status === 'proses' && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="relative z-50 h-7 px-2 text-[10px] gap-1 text-blue-600 border-blue-200 hover:bg-blue-50 dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-900/20"
-                  onClick={(e) => handleAction(e, 'forward')}
-                >
-                  Forward <Forward className="h-3 w-3" />
-                </Button>
-              )}
-
-              {/* ACTION: CLOSE (Mode: close) */}
-              {t.status === 'proses' && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="relative z-50 h-4 px-2 text-[10px] gap-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
-                  onClick={(e) => handleAction(e, 'close')}
-                >
-                  Close
-                </Button>
-              )}
-
-              {/* DONE STATE */}
-              {(t.status === 'fwd teknis' ||
-                t.status === 'done' ||
-                t.status === 'closed') && (
-                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                    <CheckCircle2 className="h-3 w-3" /> Done
-                  </span>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex justify-end h-8 w-8 p-0 rounded-lg data-[state=open]:bg-accent/50 transition-colors outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 focus-visible:ring-0">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={4} className="w-40">
+                {/* ACTION: PROCESS (Mode: open) */}
+                {t.status === 'open' && (
+                  <ActionMenuItem
+                    icon={ArrowRight}
+                    label="Process"
+                    onClick={() => openModal('open', t)}
+                  />
                 )}
-            </div>
+
+                {/* ACTION: FORWARD (Mode: forward) */}
+                {t.status === 'proses' && (
+                  <ActionMenuItem
+                    icon={Forward}
+                    label="Forward Ticket"
+                    onClick={() => openModal('forward', t)}
+                  />
+                )}
+
+                {/* ACTION: CLOSE (Mode: close) */}
+                {t.status === 'proses' && (
+                  <ActionMenuItem
+                    icon={SquareCheckBig}
+                    label="Close Ticket"
+                    onClick={() => openModal('close', t)}
+                  />
+                )}
+
+                {/* DONE STATE */}
+                {(t.status === 'fwd teknis' ||
+                  t.status === 'done' ||
+                  t.status === 'closed') && (
+                    <div className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Done</span>
+                    </div>
+                  )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )
         },
       },
     }),
     [openModal],
   )
+
+  // 6. Stats Calculation
+  const stats = useMemo(() => {
+    const isToday = (dateString: string | undefined) => {
+      if (!dateString) return false
+      const date = new Date(dateString)
+      const today = new Date()
+      return (
+        date.getDate() === today.getDate() &&
+        date.getMonth() === today.getMonth() &&
+        date.getFullYear() === today.getFullYear()
+      )
+    }
+
+    const todayTickets = tickets.filter((t) => isToday(t.createdAt))
+
+    const open = todayTickets.filter((t) => t.status === 'open').length
+    const process = todayTickets.filter((t) => t.status === 'proses').length
+    const done = todayTickets.filter((t) =>
+      ['done', 'fwd teknis', 'closed'].includes(t.status || ''),
+    ).length
+    return { open, process, done, total: todayTickets.length }
+  }, [tickets])
 
   return (
     <div className="animate-in fade-in duration-500 px-8 py-8 space-y-4">
@@ -235,6 +259,9 @@ const LogTicketPage = () => {
           </Button>
         </div>
       </div>
+
+      {/* --- STATS CARDS --- */}
+      <TicketStatsCards stats={stats} />
 
       <AutoTanStackTable<Ticket>
         data={tickets}

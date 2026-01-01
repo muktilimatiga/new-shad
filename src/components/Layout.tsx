@@ -33,6 +33,7 @@ import {
   DropdownMenuGroup,
 } from '~/components/ui'
 import { NotificationDropdown } from './notificationDropdown'
+import { GlobalSearch } from './GlobalSearch'
 import { useAppStore } from '~/hooks/store'
 import { useRealtimeNotifications } from '~/hooks/useRealtimeNotification'
 import { supabase } from '~/lib/supabase'
@@ -387,13 +388,7 @@ export const Navbar = ({
 
       <div className="flex items-center gap-2 md:gap-3">
         {/* Search Bar */}
-        <div className="relative hidden lg:block mr-2">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-          <input
-            className="h-9 w-64 rounded-full bg-slate-100 dark:bg-slate-900/50 pl-9 pr-4 text-xs outline-none placeholder:text-slate-500 text-slate-900 dark:text-white transition-all focus:ring-2 focus:ring-indigo-500/20 border border-transparent focus:bg-white dark:focus:bg-black"
-            placeholder="Global search (Ctrl+K)..."
-          />
-        </div>
+        <GlobalSearch />
 
         <div className="flex items-center gap-1">
           {currentPath.includes('/tickets') && (

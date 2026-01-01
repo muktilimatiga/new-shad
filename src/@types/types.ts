@@ -96,11 +96,19 @@ export interface OnuCatvData {
     role      String   // 'admin', 'noc', 'user'
     avatarUrl String?
     lat       Float?
-    lng       Float?function App() {
-  return (
-    <>
-      <Toaster richColors />
-      <Launcher />
+    lng       Float?
+    tickets   Ticket[]
+    logs      TicketLog[]
+  }
+
+  model Ticket {
+    id          String      @id @default(uuid())
+    title       String
+    status      String      // 'open', 'in_progress', 'resolved', 'closed'
+    priority    String      // 'low', 'medium', 'high', 'critical'
+    assigneeId  String?
+    assignee    User?       @relation(fields: [assigneeId], references: [id])
+    createdAt   DateTime    @default(now())
     </>
   )
 }
