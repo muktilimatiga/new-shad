@@ -5,48 +5,57 @@ import {
   useCreateAndProcessTicketApiV1TicketCreateAndProcessPost,
   useCloseTicketApiV1TicketClosePost,
   useForwardTicketApiV1TicketForwardPost,
-  useProcessTicketOnlyApiV1TicketProcessPost
+  useProcessTicketOnlyApiV1TicketProcessPost,
 } from '~/services/generated/'
 
 import {
-  CreateTicketFormFields, CreateTicketFormSchema,
-  OpenTicketFormFields, OpenTicketFormSchema,
-  ForwardTicketFormFields, ForwardTicketFormSchema,
-  CloseTicketFormFields, CloseTicketFormSchema
+  CreateTicketFormFields,
+  CreateTicketFormSchema,
+  OpenTicketFormFields,
+  OpenTicketFormSchema,
+  ForwardTicketFormFields,
+  ForwardTicketFormSchema,
+  CloseTicketFormFields,
+  CloseTicketFormSchema,
 } from '~/components/form/TicketFormField'
 
 import { useAppStore } from '~/hooks/store'
+import { useLogActivity } from '~/features/activity-log/activity.hooks'
 
 export type TicketMode = 'create' | 'open' | 'forward' | 'close'
 
 // 2. HELPER: Safe Enum Mapper
 // This guarantees we never send "Low" when the API wants "LOW"
 const safePriority = (val?: string) => {
-  const v = val?.toUpperCase() || 'LOW';
-  return ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(v) ? v : 'LOW';
+  const v = val?.toUpperCase() || 'LOW'
+  return ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(v) ? v : 'LOW'
 }
 
 const safeType = (val?: string) => {
-  const v = val?.toUpperCase() || 'FREE';
-  return ['FREE', 'CHARGED'].includes(v) ? v : 'FREE';
+  const v = val?.toUpperCase() || 'FREE'
+  return ['FREE', 'CHARGED'].includes(v) ? v : 'FREE'
 }
 
 export const useTicketForm = (mode: TicketMode) => {
   // 3. Get QueryClient to refresh data
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   // API Hooks
-  const createMutation = useCreateAndProcessTicketApiV1TicketCreateAndProcessPost()
+  const createMutation =
+    useCreateAndProcessTicketApiV1TicketCreateAndProcessPost()
   const openMutation = useProcessTicketOnlyApiV1TicketProcessPost()
   const forwardMutation = useForwardTicketApiV1TicketForwardPost()
   const closeMutation = useCloseTicketApiV1TicketClosePost()
 
   const user = useAppStore((state) => state.user)
 
+  // Activity logging
+  const { mutate: logActivity } = useLogActivity()
+
   // 4. Shared "On Success" logic
   // This ensures that NO MATTER which action you take, the ticket list refreshes
   const handleSuccess = async () => {
-    await queryClient.invalidateQueries({ queryKey: ['tickets'] });
+    await queryClient.invalidateQueries({ queryKey: ['tickets'] })
   }
 
   return useMemo(() => {
@@ -65,20 +74,32 @@ export const useTicketForm = (mode: TicketMode) => {
           submitLabel: 'Process Ticket',
           variant: 'default' as const,
           execute: async (data: TicketFormData) => {
-            const target = data.user_pppoe || data.name || '';
-            const action = data.action_ticket || 'cek';
+            const target = data.user_pppoe || data.name || ''
+            const action = data.action_ticket || 'cek'
 
             // Combine them (or just use target if your backend expects that)
-            const finalQuery = `${action} ${target}`.trim();
+            const finalQuery = `${action} ${target}`.trim()
 
             const res = await openMutation.mutateAsync({
               data: {
                 query: finalQuery,
                 ...commonProps,
-              }
-            });
-            await handleSuccess();
-            return res;
+              },
+            })
+
+            // Log ticket opened
+            logActivity({
+              action: 'TICKET_OPENED',
+              target: data.name || data.user_pppoe || 'Unknown',
+              status: 'SUCCESS',
+              details: JSON.stringify({
+                action: action,
+                ticketRef: data.ticketRef,
+              }),
+            })
+
+            await handleSuccess()
+            return res
           },
         }
 
@@ -106,10 +127,23 @@ export const useTicketForm = (mode: TicketMode) => {
                 priority: safePriority(data.priority) as any,
                 person_in_charge: data.person_in_charge || 'ALL TECHNICIAN',
                 ...commonProps,
-              }
-            });
-            await handleSuccess();
-            return res;
+              },
+            })
+
+            // Log ticket forwarded
+            logActivity({
+              action: 'TICKET_FORWARDED',
+              target: data.name || data.user_pppoe || 'Unknown',
+              status: 'SUCCESS',
+              details: JSON.stringify({
+                ticketRef: data.ticketRef,
+                priority: data.priority,
+                pic: data.person_in_charge,
+              }),
+            })
+
+            await handleSuccess()
+            return res
           },
         }
 
@@ -128,10 +162,22 @@ export const useTicketForm = (mode: TicketMode) => {
                 close_reason: data.action_close || 'Ticket Closed by System',
                 onu_sn: data.onu_sn || '',
                 ...commonProps,
-              }
-            });
-            await handleSuccess();
-            return res;
+              },
+            })
+
+            // Log ticket closed
+            logActivity({
+              action: 'TICKET_CLOSED',
+              target: data.name || data.user_pppoe || 'Unknown',
+              status: 'SUCCESS',
+              details: JSON.stringify({
+                ticketRef: data.ticketRef,
+                reason: data.action_close,
+              }),
+            })
+
+            await handleSuccess()
+            return res
           },
         }
 
@@ -153,17 +199,32 @@ export const useTicketForm = (mode: TicketMode) => {
                 priority: safePriority(data.priority) as any,
                 jenis: safeType(data.type) as any,
                 ...commonProps,
-              }
-            });
-            await handleSuccess();
-            return res;
+              },
+            })
+
+            // Log ticket created
+            logActivity({
+              action: 'TICKET_CREATED',
+              target: data.name || data.user_pppoe || 'Unknown',
+              status: 'SUCCESS',
+              details: JSON.stringify({
+                description: data.description,
+                priority: data.priority,
+              }),
+            })
+
+            await handleSuccess()
+            return res
           },
         }
     }
   }, [
     mode,
-    createMutation, openMutation, forwardMutation, closeMutation,
+    createMutation,
+    openMutation,
+    forwardMutation,
+    closeMutation,
     user,
-    queryClient // Add to dependencies
+    queryClient, // Add to dependencies
   ])
 }
