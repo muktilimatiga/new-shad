@@ -1,14 +1,11 @@
 import { useState } from 'react'
-import { Search, Loader2, CreditCard } from 'lucide-react'
-import { toast } from 'sonner'
+import { Search, Loader2 } from 'lucide-react'
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "~/components/ui/dialog"
-import { Button } from '~/components/ui/button'
 import { useDebouncedValue } from '~/hooks/useDebounce'
 import { useCustomersView } from '~/features/customer/customer.hooks'
 import { CustomerDetailCard } from '~/routes/broadband/components/CustomerDetailCard'
@@ -107,26 +104,6 @@ export const GlobalSearch = () => {
                     <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-hide">
                         {selectedCustomer && <CustomerDetailCard customer={selectedCustomer} />}
                     </div>
-
-                    {/* Fixed Footer */}
-                    <DialogFooter className="px-6 py-5 border-t bg-slate-50/50 dark:bg-slate-900/20 backdrop-blur-xl gap-4">
-                        <Button
-                            variant="outline"
-                            className="flex-1 gap-2.5 h-11 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-400 dark:hover:border-emerald-500/50 transition-all duration-200"
-                            onClick={() => toast.info(`Checking payment for ${selectedCustomer?.nama}...`)}
-                        >
-                            <CreditCard className="h-4 w-4" />
-                            Payment
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="flex-1 gap-2.5 h-11 text-sm font-medium rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950/30 dark:hover:text-indigo-400 dark:hover:border-indigo-500/50 transition-all duration-200"
-                            onClick={() => toast.info(`Running check on ${selectedCustomer?.nama}...`)}
-                        >
-                            <Search className="h-4 w-4" />
-                            Cek
-                        </Button>
-                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </>

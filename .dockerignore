@@ -1,0 +1,41 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.output
+dist
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files (will be mounted or passed as env vars)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing
+coverage
+
+# Misc
+.DS_Store
+Thumbs.db
+*.md
+!README.md
+
+# TanStack
+.tanstack
+
+# Bun
+bun.lock
